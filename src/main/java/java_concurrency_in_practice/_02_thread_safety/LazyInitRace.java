@@ -1,6 +1,5 @@
-package basic;
+package java_concurrency_in_practice._02_thread_safety;
 
-import help.ExpensiveObject;
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe

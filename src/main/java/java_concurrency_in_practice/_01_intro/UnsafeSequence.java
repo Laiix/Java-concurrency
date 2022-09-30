@@ -1,4 +1,4 @@
-package basic;
+package java_concurrency_in_practice._01_intro;
 
 import net.jcip.annotations.NotThreadSafe;
 

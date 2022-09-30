@@ -1,21 +1,22 @@
-package basic;
+package java_concurrency_in_practice._02_thread_safety;
 
-import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 
 import javax.servlet.*;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 缓存对其最近计算结果Servlet
+ * 统计已处理请求数量的Servlet
  */
-@NotThreadSafe
-public class UnsafeCachingFactorizer implements Servlet {
-    private final AtomicReference<BigInteger> lastNumber
-            = new AtomicReference<BigInteger>();
-    private final AtomicReference<BigInteger[]> lastFactors
-            = new AtomicReference<BigInteger[]>();
+@ThreadSafe
+public class CountingFactorizer implements Servlet {
+    private final AtomicLong count = new AtomicLong(0);
+
+    public long getCount() {
+        return count.get();
+    }
 
     public void init(ServletConfig servletConfig) throws ServletException {
         
@@ -27,14 +28,9 @@ public class UnsafeCachingFactorizer implements Servlet {
 
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         BigInteger i = extratFromRequest(servletRequest);
-        if(i.equals(lastNumber.get()))
-            encodeIntoResponse(servletResponse, lastFactors.get());
-        else {
-            BigInteger[] factors = factor(i);
-            lastNumber.set(i);
-            lastFactors.set(factors);
-            encodeIntoResponse(servletResponse, factors);
-        }
+        BigInteger[] factors = factor(i);
+        count.incrementAndGet();
+        encodeIntoResponse(servletResponse, factors);
     }
 
     private void encodeIntoResponse(ServletResponse servletResponse, BigInteger[] factors) {

@@ -1,21 +1,20 @@
-package basic;
+package java_concurrency_in_practice._02_thread_safety;
 
-import net.jcip.annotations.ThreadSafe;
+import net.jcip.annotations.NotThreadSafe;
 
 import javax.servlet.*;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 统计已处理请求数量的Servlet
  */
-@ThreadSafe
-public class CountingFactorizer implements Servlet {
-    private final AtomicLong count = new AtomicLong(0);
+@NotThreadSafe
+public class UnsafeCountingFactorizer implements Servlet {
+    private long count = 0;
 
     public long getCount() {
-        return count.get();
+        return count;
     }
 
     public void init(ServletConfig servletConfig) throws ServletException {
@@ -29,7 +28,7 @@ public class CountingFactorizer implements Servlet {
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         BigInteger i = extratFromRequest(servletRequest);
         BigInteger[] factors = factor(i);
-        count.incrementAndGet();
+        ++count;//非原子操作
         encodeIntoResponse(servletResponse, factors);
     }
 

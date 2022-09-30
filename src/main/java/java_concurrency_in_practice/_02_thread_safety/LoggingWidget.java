@@ -1,6 +1,5 @@
-package basic;
+package java_concurrency_in_practice._02_thread_safety;
 
-import help.Widget;
 
 /**
  * 如果内置锁不是可重入的，那么这段代码将发生死锁

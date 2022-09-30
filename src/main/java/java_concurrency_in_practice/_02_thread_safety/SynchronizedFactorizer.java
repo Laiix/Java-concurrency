@@ -1,4 +1,4 @@
-package basic;
+package java_concurrency_in_practice._02_thread_safety;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -11,19 +11,9 @@ import java.math.BigInteger;
  * 缓存对其最近计算结果Servlet
  */
 @ThreadSafe
-public class CachedFactorizer implements Servlet {
+public class SynchronizedFactorizer implements Servlet {
     @GuardedBy("this") private BigInteger lastNumber;
     @GuardedBy("this") private BigInteger[] lastFactors;
-    @GuardedBy("this") private long hits;
-    @GuardedBy("this") private long cacheHits;
-
-    public synchronized long getHits() {
-        return hits;
-    }
-
-    public synchronized double getCacheHitRatio() {
-        return (double)cacheHits / (double)hits;
-    }
 
     public void init(ServletConfig servletConfig) throws ServletException {
         
@@ -42,23 +32,14 @@ public class CachedFactorizer implements Servlet {
      */
     public synchronized void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         BigInteger i = extratFromRequest(servletRequest);
-        BigInteger[] factors = null;
-        synchronized (this) {
-            ++hits;
-            if(i.equals(lastNumber)) {
-                ++cacheHits;
-                factors = lastFactors.clone();
-            }
+        if(i.equals(lastNumber))
+            encodeIntoResponse(servletResponse, lastFactors);
+        else {
+            BigInteger[] factors = factor(i);
+            lastNumber = i;
+            lastFactors = factors;
+            encodeIntoResponse(servletResponse, factors);
         }
-
-        if(factors==null) {
-            factors = factor(i);
-            synchronized (this) {
-                lastNumber = i;
-                lastFactors = factors.clone();
-            }
-        }
-        encodeIntoResponse(servletResponse, factors);
     }
 
     private void encodeIntoResponse(ServletResponse servletResponse, BigInteger[] factors) {

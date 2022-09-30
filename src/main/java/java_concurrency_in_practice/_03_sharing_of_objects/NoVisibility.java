@@ -1,4 +1,4 @@
-package basic;
+package java_concurrency_in_practice._03_sharing_of_objects;
 
 public class NoVisibility {
     private static boolean ready;
